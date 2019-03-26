@@ -89,6 +89,8 @@ function encrypt_backup
 
     l1 "Encrypting backup of ${DATABASE}"
     ${DRY_RUN} gpg --no-use-agent --passphrase-file "${archive_password_file}" --symmetric "${backup_path}/${previous_filename}" && l2
+    l1 "Removing unencrypted version of ${DATABASE}"
+    ${DRY_RUN} rm -f "${backup_path}/${previous_filename}" && l2
 }
 
 function decrypt_backup
@@ -113,6 +115,9 @@ function send_backup
         backup_server_host=`echo ${BACKUP_SERVER} | cut -d':' -f 1`
         backup_server_path=`echo ${BACKUP_SERVER} | cut -d':' -f 2`
         ${DRY_RUN} ssh -t "${backup_server_host}" "ln -f -s ${current_filename} ${backup_server_path}/${PREFIX}/${pointer_filename}" && l2
+
+        l1 "Removing local backup version of ${DATABASE}"
+        ${DRY_RUN} rm -f "${backup_path}/${current_filename}" && l2
     fi
 }
 
