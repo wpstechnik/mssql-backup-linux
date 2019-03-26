@@ -48,6 +48,9 @@ function create_backup
     sql_user=`echo ${HOST} | cut -d'@' -f 1`
     sql_host=`echo ${HOST} | cut -d'@' -f 2`
 
+    l1 "Creating backup directory"
+    ${DRY_RUN} mkdir -p "${backup_path}" && ${DRY_RUN} chown mssql:mssql "${backup_path}" && l2
+
     l1 "Creating backup ${DATABASE} from ${PREFIX} as $sql_user with pass ${MSSQL_PASS} on host $sql_host"
     ${DRY_RUN} sqlcmd -S $sql_host -U $sql_user -P "${MSSQL_PASS}" -Q "BACKUP DATABASE [${DATABASE}] TO DISK = N'${backup_path}/${current_filename}' WITH NOFORMAT, NOINIT, NAME = '${DATABASE}', SKIP, NOREWIND, NOUNLOAD, STATS = 10" && l2
 }
@@ -124,7 +127,8 @@ function send_backup
 function get_backup
 {
     current_filename="${PREFIX}-${DATABASE}.bak.lz.gpg"
-    ${DRY_RUN} mkdir -p "${backup_path}"
+    l1 "Creating backup directory"
+    ${DRY_RUN} mkdir -p "${backup_path}" && ${DRY_RUN} chown mssql:mssql "${backup_path}" && l2
     l1 "Geting backup of ${DATABASE} from ${BACKUP_SERVER}"
     ${DRY_RUN} scp "${BACKUP_SERVER}/${PREFIX}/${current_filename}" "${backup_path}/${current_filename}" && l2
 
